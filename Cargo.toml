@@ -1,0 +1,12 @@
+[package]
+edition = "2021"
+name = "Rust-Tech"
+version = "1.0.0"
+authors = ["栈烟 <zhanyan.work@outlook.com>"]
+keywords = ["NoobCode"]
+
+[profile.dev]
+opt-level = 1
+codegen-units = 64
+
+[dependencies]
