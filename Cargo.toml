@@ -17,7 +17,9 @@ codegen-units = 64
 rand = "0.8.5"
 tokio = { version = "1.39.2", features = ["full"] }
 axum = "0.7.5"
-tower = "0.4.13"
+tower = { version = "0.4.13", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+reqwest = { version = "0.12.5", features = ["json"] }
 serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.125"

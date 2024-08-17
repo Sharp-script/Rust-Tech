@@ -1,9 +1,11 @@
 use axum::{
-    routing::{get, post},
     http::StatusCode,
+    routing::{get, post},
     Json, Router,
+    extract::Path
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use tokio::net::TcpListener;
 use tracing::info;
 
@@ -18,7 +20,10 @@ async fn main() {
 fn routers_build() -> Router {
     let routers = Router::new()
         .route("/", get(root))
-        .route("/users", post(create_user));
+        .route("/users", post(create_user))
+        .route("/start_clean", get(start_clean))
+        .route("/finish_clean/:order_no", get(finish_clean))
+        ;
 
     info!("Server app router has init");
 
@@ -48,6 +53,43 @@ async fn create_user(Json(payload): Json<CreateUser>) -> (StatusCode, Json<User>
     };
 
     (StatusCode::CREATED, Json(user))
+}
+
+async fn start_clean() -> (StatusCode, Json<String>) {
+    let client = reqwest::Client::new();
+    let req = json!({
+        "memberId" : 1411424612450304i64,
+        "deviceId" : "202304060300309",
+        "amount"   : 50f32
+    });
+    let response = client
+        .post("http://junjian.admin.zhan-yan.cn:57658/adminApi/rpc/clean/1/start")
+        .json(&req)
+        .send()
+        .await;
+
+    let resp_info = response.unwrap().text().await.unwrap();
+    info!("启动洗车响应: {}", resp_info);
+
+    (StatusCode::CREATED, Json(resp_info))
+}
+
+async fn finish_clean(Path(order_no): Path<String>) -> (StatusCode, Json<String>) {
+    let client = reqwest::Client::new();
+    let req = json!({
+        "memberId" : 1411424612450304i64,
+        "orderNo" : order_no
+    });
+    let response = client
+        .post("http://junjian.admin.zhan-yan.cn:57658/adminApi/rpc/clean/1/finish")
+        .json(&req)
+        .send()
+        .await;
+
+    let resp_info = response.unwrap().text().await.unwrap();
+    info!("結束洗车响应: {}", resp_info);
+
+    (StatusCode::CREATED, Json(resp_info))
 }
 
 #[derive(Deserialize)]
